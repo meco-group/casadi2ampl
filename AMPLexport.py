@@ -40,15 +40,29 @@ def AMPLexport(nlp,data):
   algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
   algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
   algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
-  algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
+  
+  is_var = dict()
+  
   algorithms = []
   for a in algorithm.split(";")[:-1]:
-    rhs = a.split("=")[1]
-    if "x" not in rhs and "at" not in rhs:
-      algorithms.append("param " +a)
-    else:
+    lhs, rhs = a.split("=")
+    
+    
+    var = "x" in rhs
+
+    if not var:
+      for m in re.findall("(at\d+)",rhs):
+        if is_var[m]:
+          var = True
+          break
+
+    is_var[lhs.strip()] = var
+    
+    if var:
       algorithms.append("var " +a)
-  
+    else:
+      algorithms.append("param " +a)
+    
   main += ";\n".join(algorithms)+ ";\n"
 
 
