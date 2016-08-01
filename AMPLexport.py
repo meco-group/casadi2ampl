@@ -25,8 +25,8 @@ def AMPLexport(solver,data):
   fun = Function('f',ins,fun.call(ins),{"live_variables": False})
 
   main = """
-  var x{1..%d} := 0;
-  var p{1..%d} := 0;
+var x{1..%d} := 0;
+var p{1..%d} := 0;
   """ % (fun.nnz_in(0),fun.nnz_in(1))
 
 
