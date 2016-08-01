@@ -74,7 +74,6 @@ def AMPLexport(nlp,data):
     return bool(a>=1e20) or bool(a<=-1e20)
 
   for i in range(lbg.shape[0]):
-    print i,lbg[i], ubg[i]
     if isinf(lbg[i]) and isinf(ubg[i]):
       continue
     elif lbg[i]==ubg[i]:
@@ -87,7 +86,12 @@ def AMPLexport(nlp,data):
       constr.append("  con%d_lower: g%i >= %.16f" % (i,i,float(lbg[i])))
       constr.append("  con%d_upper: g%i >= %.16f" % (i,i,float(ubg[i])))
   constr = ";\n".join(constr)+";\n"
-      
+  
+  displayvar = ""  # string to print solution
+  varstr = ["x%d," % (i) for i in range(x0.shape[0])]
+  for i in range(x0.shape[0]):
+    displayvar += varstr[i]
+  displayvar= displayvar[:-1]  # remove last comma
 
   print """
 
@@ -104,4 +108,6 @@ option solver knitro;
 
 solve;
 
-  """.format(main=main,constr=constr)
+display {displayvar};
+
+  """.format(main=main,constr=constr,displayvar=displayvar)
