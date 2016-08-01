@@ -16,4 +16,4 @@ solver = nlpsol("solver", "ipopt", nlp)
 
 data = {"x0":[2.5,3.0,0.75],"lbg":0,"ubg":0}
 
-AMPLexport(solver,data)
+AMPLexport(nlp,data)

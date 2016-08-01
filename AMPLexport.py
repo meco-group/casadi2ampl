@@ -16,9 +16,9 @@ solver = nlpsol("solver", "ipopt", nlp)
 
 data = {"x0":[2.5,3.0,0.75],"lbg":0,"ubg":0}
 
-def AMPLexport(solver,data):
+def AMPLexport(nlp,data):
 
-  fun = solver.oracle()
+  fun = Function('nlp',nlp,["x","p"],["f","g"])
   fun = fun.expand()
 
   ins = fun.sx_in()
@@ -41,7 +41,7 @@ var p{1..%d} := 0;
   algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
   algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
   algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
-  main += ";\n".join([ "var "+s for s in  algorithm.split(";")[:-1]])
+  main += ";\n".join([ "var "+s for s in  algorithm.split(";")[:-1]])+ ";\n"
 
   lbg = DM(fun.sparsity_out(1))
   ubg = DM(fun.sparsity_out(1))
