@@ -1,21 +1,5 @@
 from casadi import *
 
-
-# Declare variables
-x = SX.sym("x")
-y = SX.sym("y")
-z = SX.sym("z")
-
-# Formulate the NLP
-f = x**2 + 100*z**2
-g = z + (1-x)**2 - y
-nlp = {'x':vertcat(x,y,z), 'f':f, 'g':g}
-
-# Create an NLP solver
-solver = nlpsol("solver", "ipopt", nlp)
-
-data = {"x0":[2.5,3.0,0.75],"lbg":0,"ubg":0}
-
 def AMPLexport(nlp,data):
 
   fun = Function('nlp',nlp,["x","p"],["f","g"])
@@ -24,14 +8,11 @@ def AMPLexport(nlp,data):
   ins = fun.sx_in()
   fun = Function('f',ins,fun.call(ins),{"live_variables": False})
 
-  main = """
-var p{1..%d} := 0;
-""" % (fun.nnz_in(0))
-
   lbg = DM(fun.sparsity_out(1))
   ubg = DM(fun.sparsity_out(1))
   if "lbg" in data: lbg[:,:] = data["lbg"]
   if "ubg" in data: ubg[:,:] = data["ubg"]
+
 
   lbx = DM(fun.sparsity_in(0))
   x0 = DM(fun.sparsity_in(0))
@@ -39,9 +20,13 @@ var p{1..%d} := 0;
   if "lbx" in data: lbx[:,:] = data["lbx"]
   if "ubx" in data: ubx[:,:] = data["ubx"]
   if "x0" in data: x0[:,:] = data["x0"]
+  
+  p = DM(fun.sparsity_in(1))
+  if "p" in data: p[:,:] = data["p"]
 
-
-  main+= ";\n".join(["var x%d := %.16f, >= %.16f, <= %.16f" % (i+1,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
+  main= ";\n".join(["var x%d := %.16f, >= %.16f, <= %.16f" % (i,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
+  
+  main+= ";\n".join(["par p%d := %.16f" % (i,float(p[i])) for i in range(p.shape[0])])+";\n"
   
   algorithm = "".join(str(fun).split("\n"))
   for i,l in enumerate(algorithm):
@@ -50,7 +35,8 @@ var p{1..%d} := 0;
   algorithm = "".join(algorithm[i:])
     
   algorithm = algorithm.replace("@","at")
-  algorithm = re.sub("input\[0\]\[(\d+)\]",lambda m: "x%d" % (int(m.group(1))+1),algorithm)
+  algorithm = re.sub("input\[0\]\[(\d+)\]",lambda m: "x%d" % (int(m.group(1))),algorithm)
+  algorithm = re.sub("input\[1\]\[(\d+)\]",lambda m: "p%d" % (int(m.group(1))),algorithm)
   algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
   algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
   algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
@@ -92,7 +78,5 @@ s.t.
 option solver knitro;
 
 solve;
-
-display x;
 
   """.format(main=main,constr=constr)
