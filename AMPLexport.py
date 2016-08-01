@@ -27,7 +27,7 @@ def AMPLexport(nlp,data):
   main = """
 var x{1..%d} := 0;
 var p{1..%d} := 0;
-  """ % (fun.nnz_in(0),fun.nnz_in(1))
+""" % (fun.nnz_in(0),fun.nnz_in(1))
 
 
   algorithm = "".join(str(fun).split("\n"))
