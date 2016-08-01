@@ -25,23 +25,8 @@ def AMPLexport(nlp,data):
   fun = Function('f',ins,fun.call(ins),{"live_variables": False})
 
   main = """
-var x{1..%d} := 0;
 var p{1..%d} := 0;
-""" % (fun.nnz_in(0),fun.nnz_in(1))
-
-
-  algorithm = "".join(str(fun).split("\n"))
-  for i,l in enumerate(algorithm):
-    if l.startswith("@"):
-      break
-  algorithm = "".join(algorithm[i:])
-    
-  algorithm = algorithm.replace("@","at")
-  algorithm = re.sub("input\[0\]\[(\d+)\]",lambda m: "x[%d]" % (int(m.group(1))+1),algorithm)
-  algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
-  algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
-  algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
-  main += ";\n".join([ "var "+s for s in  algorithm.split(";")[:-1]])+ ";\n"
+""" % (fun.nnz_in(0))
 
   lbg = DM(fun.sparsity_out(1))
   ubg = DM(fun.sparsity_out(1))
@@ -56,7 +41,22 @@ var p{1..%d} := 0;
   if "x0" in data: x0[:,:] = data["x0"]
 
 
-  bounds = ";\n".join(["let x[%d] := %.16f, >= %.16f, <= %.16f" % (i,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
+  main+= ";\n".join(["var x%d := %.16f, >= %.16f, <= %.16f" % (i+1,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
+  
+  algorithm = "".join(str(fun).split("\n"))
+  for i,l in enumerate(algorithm):
+    if l.startswith("@"):
+      break
+  algorithm = "".join(algorithm[i:])
+    
+  algorithm = algorithm.replace("@","at")
+  algorithm = re.sub("input\[0\]\[(\d+)\]",lambda m: "x%d" % (int(m.group(1))+1),algorithm)
+  algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
+  algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
+  algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
+  main += ";\n".join([ "var "+s for s in  algorithm.split(";")[:-1]])+ ";\n"
+
+
 
   constr = []
 
@@ -83,9 +83,8 @@ var p{1..%d} := 0;
 reset;
 
 {main}
-{bounds}
 
-minimize f: f;
+minimize f1: f;
 
 s.t.
 {constr}
@@ -96,4 +95,4 @@ solve;
 
 display x;
 
-  """.format(main=main,constr=constr,bounds=bounds)
+  """.format(main=main,constr=constr)
