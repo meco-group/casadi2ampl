@@ -87,11 +87,7 @@ def AMPLexport(nlp,data):
       constr.append("  con%d_upper: g%i >= %.16f" % (i,i,float(ubg[i])))
   constr = ";\n".join(constr)+";\n"
   
-  displayvar = ""  # string to print solution
-  varstr = ["x%d," % (i) for i in range(x0.shape[0])]
-  for i in range(x0.shape[0]):
-    displayvar += varstr[i]
-  displayvar= displayvar[:-1]  # remove last comma
+  displayvar = ",".join("x%d" % (i) for i in range(x0.shape[0]))
 
   print """
 
