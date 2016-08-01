@@ -40,6 +40,7 @@ var p{1..%d} := 0;
   algorithm = re.sub("input\[0\]\[(\d+)\]",lambda m: "x[%d]" % (int(m.group(1))+1),algorithm)
   algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
   algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
+  algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
   main += ";\n".join([ "var "+s for s in  algorithm.split(";")[:-1]])
 
   lbg = DM(fun.sparsity_out(1))
