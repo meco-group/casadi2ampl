@@ -1,4 +1,5 @@
 from casadi import *
+import numpy as np
 
 def AMPLexport(nlp,data):
 
@@ -8,15 +9,15 @@ def AMPLexport(nlp,data):
   ins = fun.sx_in()
   fun = Function('f',ins,fun.call(ins),{"live_variables": False})
 
-  lbg = DM(fun.sparsity_out(1))
-  ubg = DM(fun.sparsity_out(1))
+  lbg = -np.inf*DM(fun.sparsity_out(1))
+  ubg = np.inf*DM(fun.sparsity_out(1))
   if "lbg" in data: lbg[:,:] = data["lbg"]
   if "ubg" in data: ubg[:,:] = data["ubg"]
 
 
-  lbx = DM(fun.sparsity_in(0))
+  lbx = -np.inf*DM(fun.sparsity_in(0))
   x0 = DM(fun.sparsity_in(0))
-  ubx = DM(fun.sparsity_in(0))
+  ubx = np.inf*DM(fun.sparsity_in(0))
   if "lbx" in data: lbx[:,:] = data["lbx"]
   if "ubx" in data: ubx[:,:] = data["ubx"]
   if "x0" in data: x0[:,:] = data["x0"]
