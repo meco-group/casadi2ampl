@@ -76,14 +76,14 @@ def AMPLexport(nlp,data):
     if isinf(lbg[i]) and isinf(ubg[i]):
       continue
     elif lbg[i]==ubg[i]:
-      constr.append("  con%d: g%i = %.16f;" % (i,i,float(lbg[i])))
+      constr.append("  con%d: g%i = %.16f" % (i,i,float(lbg[i])))
     elif isinf(lbg[i]):
-      constr.append("  con%d: g%i <= %.16f;" % (i,i,float(ubg[i])))
+      constr.append("  con%d: g%i <= %.16f" % (i,i,float(ubg[i])))
     elif isinf(ubg[i]):
-      constr.append("  con%d: g%i >= %.16f;" % (i,i,float(lbg[i])))
+      constr.append("  con%d: g%i >= %.16f" % (i,i,float(lbg[i])))
     else:
-      constr.append("  con%d_lower: g%i >= %.16f;" % (i,i,float(lbg[i])))
-      constr.append("  con%d_upper: g%i >= %.16f;" % (i,i,float(lbg[i])))
+      constr.append("  con%d_lower: g%i >= %.16f" % (i,i,float(lbg[i])))
+      constr.append("  con%d_upper: g%i >= %.16f" % (i,i,float(lbg[i])))
   constr = ";\n".join(constr)
       
 
