@@ -26,7 +26,7 @@ def AMPLexport(nlp,data):
 
   main= ";\n".join(["var x%d := %.16f, >= %.16f, <= %.16f" % (i,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
   
-  main+= ";\n".join(["par p%d := %.16f" % (i,float(p[i])) for i in range(p.shape[0])])+";\n"
+  main+= ";\n".join(["param p%d := %.16f" % (i,float(p[i])) for i in range(p.shape[0])])+";\n"
   
   algorithm = "".join(str(fun).split("\n"))
   for i,l in enumerate(algorithm):
@@ -40,7 +40,15 @@ def AMPLexport(nlp,data):
   algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
   algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
   algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
-  main += ";\n".join([ "var "+s for s in  algorithm.split(";")[:-1]])+ ";\n"
+  algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
+  algorithms = []
+  for a in algorithm.split(";")[:-1]:
+    if re.match("^[ \.\d;]+$",a.split("=")[1]):
+      algorithms.append("param " +a)
+    else:
+      algorithms.append("var " +a)
+  
+  main += ";\n".join(algorithms)+ ";\n"
 
 
 
