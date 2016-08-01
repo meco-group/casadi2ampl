@@ -56,7 +56,7 @@ var p{1..%d} := 0;
   if "x0" in data: x0[:,:] = data["x0"]
 
 
-  bounds = ";\n".join(["let x[%d] := %.16f, >= %.16f, <= %.16f" % (i,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])
+  bounds = ";\n".join(["let x[%d] := %.16f, >= %.16f, <= %.16f" % (i,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
 
   constr = []
 
