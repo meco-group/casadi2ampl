@@ -84,7 +84,7 @@ def AMPLexport(nlp,data):
     else:
       constr.append("  con%d_lower: g%i >= %.16f" % (i,i,float(lbg[i])))
       constr.append("  con%d_upper: g%i >= %.16f" % (i,i,float(lbg[i])))
-  constr = ";\n".join(constr)
+  constr = ";\n".join(constr)+";\n"
       
 
   print """
