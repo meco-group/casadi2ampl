@@ -71,9 +71,10 @@ def AMPLexport(nlp,data):
   constr = []
 
   def isinf(a):
-    return bool(a>=1e-20) or bool(a<=-1e-20)
+    return bool(a>=1e20) or bool(a<=-1e20)
 
   for i in range(lbg.shape[0]):
+    print i,lbg[i], ubg[i]
     if isinf(lbg[i]) and isinf(ubg[i]):
       continue
     elif lbg[i]==ubg[i]:
@@ -84,7 +85,7 @@ def AMPLexport(nlp,data):
       constr.append("  con%d: g%i >= %.16f" % (i,i,float(lbg[i])))
     else:
       constr.append("  con%d_lower: g%i >= %.16f" % (i,i,float(lbg[i])))
-      constr.append("  con%d_upper: g%i >= %.16f" % (i,i,float(lbg[i])))
+      constr.append("  con%d_upper: g%i >= %.16f" % (i,i,float(ubg[i])))
   constr = ";\n".join(constr)+";\n"
       
 
