@@ -43,7 +43,7 @@ def AMPLexport(nlp,data):
   algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
   algorithms = []
   for a in algorithm.split(";")[:-1]:
-    if re.match("^[ \.\d;]+$",a.split("=")[1]):
+    if re.match("^[ -\.\d;]+$",a.split("=")[1]):
       algorithms.append("param " +a)
     else:
       algorithms.append("var " +a)
