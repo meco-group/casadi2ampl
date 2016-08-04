@@ -2,6 +2,8 @@ from casadi import *
 import numpy as np
 
 def AMPLexport(nlp,data):
+  def isinf(a):
+    return bool(a>=1e20) or bool(a<=-1e20)
 
   fun = Function('nlp',nlp,["x","p"],["f","g"])
   fun = fun.expand()
@@ -24,10 +26,18 @@ def AMPLexport(nlp,data):
   
   p = DM(fun.sparsity_in(1))
   if "p" in data: p[:,:] = data["p"]
-
-  main= ";\n".join(["var x%d := %.16f, >= %.16f, <= %.16f" % (i,float(x0[i]),float(lbx[i]),float(ubx[i])) for i in range(x0.shape[0])])+";\n"
-  
-  main+= ";\n".join(["param p%d := %.16f" % (i,float(p[i])) for i in range(p.shape[0])])+";\n"
+  main = ""
+  for i in range(p.shape[0]):
+     main += "param p%d = %.16f;\n" % (i,float(p[i]))
+  for i in range(x0.shape[0]):
+    if isinf(lbx[i]) and isinf(ubx[i]):
+      main+="var x%d := %.16f;\n" % (i,float(x0[i]))
+    elif isinf(lbx[i]):
+      main+="var x%d := %.16f, <= %.16f;\n" % (i,float(x0[i]),float(ubx[i]))
+    elif isinf(ubx[i]):
+      main+="var x%d := %.16f, >= %.16f;\n" % (i,float(x0[i]),float(lbx[i]))
+    else:
+      main+="var x%d := %.16f, >= %.16f, <= %.16f;\n" % (i,float(x0[i]),float(lbx[i]),float(ubx[i]))
   
   algorithm = "".join(str(fun).split("\n"))
   for i,l in enumerate(algorithm):
@@ -46,9 +56,15 @@ def AMPLexport(nlp,data):
   
   algorithms = []
   for a in algorithm.split(";")[:-1]:
-    lhs, rhs = a.split("=")
+    try:
+      lhs, rhs = a.split("=",1)
+    except:
+      print 'There was an error here'
     
-    
+    print rhs
+    if ">" in rhs or "<" in rhs or "=" in rhs:
+      rhs = "if %s then 1 else 0" % rhs
+
     var = "x" in rhs
 
     if not var:
@@ -59,6 +75,7 @@ def AMPLexport(nlp,data):
 
     is_var[lhs.strip()] = var
     
+    a = "%s = %s" % (lhs, rhs)
     if var:
       algorithms.append("var " +a)
     else:
@@ -70,8 +87,6 @@ def AMPLexport(nlp,data):
 
   constr = []
 
-  def isinf(a):
-    return bool(a>=1e20) or bool(a<=-1e20)
 
   for i in range(lbg.shape[0]):
     if isinf(lbg[i]) and isinf(ubg[i]):
