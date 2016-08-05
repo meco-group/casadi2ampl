@@ -60,8 +60,7 @@ def AMPLexport(nlp,data):
       lhs, rhs = a.split("=",1)
     except:
       print 'There was an error here'
-    
-    print rhs
+
     if ">" in rhs or "<" in rhs or "=" in rhs:
       rhs = "if %s then 1 else 0" % rhs
 
@@ -104,21 +103,25 @@ def AMPLexport(nlp,data):
   
   displayvar = ",".join("x%d" % (i) for i in range(x0.shape[0]))
 
-  print """
+  # Write model to file
+  with open('results.mod', 'wb') as modFile:
+          modFile.write("""
+  reset;
 
-reset;
+  {main}
 
-{main}
+  minimize f1: f;
 
-minimize f1: f;
+  s.t.
+  {constr}
+    """.format(main=main,constr=constr))
 
-s.t.
-{constr}
+  with open('results.com', 'wb') as comFile:
+    comFile.write("""
+  option solver knitro;
 
-option solver knitro;
+  solve;
 
-solve;
+  display {displayvar};
 
-display {displayvar};
-
-  """.format(main=main,constr=constr,displayvar=displayvar)
+    """.format(displayvar=displayvar))
