@@ -118,7 +118,6 @@ def AMPLexport(nlp,data):
 
   with open('results.com', 'wb') as comFile:
     comFile.write("""
-  option solver knitro;
 
   solve;
 
