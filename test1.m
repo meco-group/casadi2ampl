@@ -19,4 +19,4 @@ data = struct('x0' , [2.5 3.0 0.75],... % solution guess
              'lbg',    0,...           % lower bound on g
              'ubg',    0);             % upper bound on g
          
- casadi2ampl('results2.mod',nlp,data,[false, false, false])
+ casadi2ampl('results2',nlp,data,[false, false, false])

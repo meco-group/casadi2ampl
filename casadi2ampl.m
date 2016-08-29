@@ -113,8 +113,16 @@ function out = casadi2ampl(fname,nlp,data,discrete)
   end
   
   % Write model to file
-  file = fopen(fname,'w');
+  file = fopen([fname '.mod'],'w');
   fprintf(file,'reset;\n%s\nminimize f1: f;\ns.t.\n%s\n', main, constr);
-    
+  
+  displayvar = cell(1,size(x0,1));
+  for i=1:size(x0,1)
+      displayvar{i} = sprintf('x%d',i-1);
+  end
+  
+  
+  file = fopen([fname '.com'],'w');
+  fprintf(file,'solve;\ndisplay %s;\n',strjoin(displayvar,','));
     
 end
