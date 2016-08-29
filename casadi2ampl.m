@@ -29,14 +29,19 @@ function out = casadi2ampl(fname,nlp,data,discrete)
      main = [ main sprintf('param p%d = %.16f;\n',i-1,full(p(i)))];
   end
   for i=1:size(x0,1)
-    if isinf(full(lbx(i))) && isinf(full(ubx(i)))
-      main = [ main sprintf('var x%d := %.16f;\n',i-1,full(x0(i)))];
-    elseif isinf(full(lbx(i)))
-      main = [ main sprintf('var x%d := %.16f, <= %.16f;\n',i-1,full(x0(i)),full(ubx(i)))];
-    elseif isinf(full(ubx(i)))
-      main = [ main sprintf('var x%d := %.16f, >= %.16f;\n', i-1,full(x0(i)),full(lbx(i)))];
+    if discrete(i)
+        common = sprintf('var x%d := %.16f, integer',i-1,full(x0(i)));
     else
-      main = [ main sprintf('var x%d := %.16f, >= %.16f, <= %.16f;\n', i-1,full(x0(i)),full(lbx(i)),full(ubx(i)))];
+        common = sprintf('var x%d := %.16f',i-1,full(x0(i)));
+    end
+    if isinf(full(lbx(i))) && isinf(full(ubx(i)))
+      main = [ main sprintf('%s;\n',common)];
+    elseif isinf(full(lbx(i)))
+      main = [ main sprintf('%s, <= %.16f;\n',common,full(ubx(i)))];
+    elseif isinf(full(ubx(i)))
+      main = [ main sprintf('%s, >= %.16f;\n', common,full(lbx(i)))];
+    else
+      main = [ main sprintf('%s, >= %.16f, <= %.16f;\n', common,full(lbx(i)),full(ubx(i)))];
     end
   end
 
@@ -55,8 +60,6 @@ function out = casadi2ampl(fname,nlp,data,discrete)
   algorithm = regexprep(algorithm,'output\[0\]\[(\d+)\]','f');
   algorithm = regexprep(algorithm,'output\[1\]\[(\d+)\]','g$1');
   algorithm = regexprep(algorithm,'sq\((.*?)\)','($1)^2');
-  
-  algorithm
   
   is_var = struct();
   
