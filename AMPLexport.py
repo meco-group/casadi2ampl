@@ -51,6 +51,7 @@ def AMPLexport(nlp,data):
   algorithm = re.sub("output\[0\]\[(\d+)\]",r"f",algorithm)
   algorithm = re.sub("output\[1\]\[(\d+)\]",r"g\1",algorithm)
   algorithm = re.sub(r"\bsq\((.*?)\)",r"(\1)^2",algorithm)
+  algorithm = re.sub(r"\bfabs\((.*?)\)",r"abs(\1)",algorithm)
   
   is_var = dict()
   
