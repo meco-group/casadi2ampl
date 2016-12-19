@@ -60,6 +60,7 @@ function out = casadi2ampl(fname,nlp,data,discrete)
   algorithm = regexprep(algorithm,'output\[0\]\[(\d+)\]','f');
   algorithm = regexprep(algorithm,'output\[1\]\[(\d+)\]','g$1');
   algorithm = regexprep(algorithm,'sq\((.*?)\)','($1)^2');
+  algorithm = regexprep(algorithm,'fabs\((.*?)\)','abs($1)');
   
   is_var = struct();
   
